@@ -53,12 +53,23 @@
 \NewEnviron{comment}{}
 \DeclareExerciseProperty{nuevapagina}
 \newif\ifmostrarpuntos \mostrarpuntostrue   % \mostrarpuntosfalse: no imprime «(25 puntos)»
+% Título del problema en negrita, con punto final salvo que termine en ? o !
+\ExplSyntaxOn
+\cs_new_protected:Npn \cursosubtitulo #1
+  {
+    \textbf{ #1
+      \str_case_e:nnF { \str_item:nn {#1} {-1} } { {?} {} {!} {} } {.}
+    }
+  }
+\cs_new_protected:Npn \cursosubtituloactual
+  { \GetExercisePropertyT {subtitle} { \cursosubtitulo {##1} ~ } }
+\ExplSyntaxOff
 % Cada problema se imprime como un ítem numerado de una lista, igual que con
 % \begin{enumerate}\item: las listas internas conservan sus etiquetas a), b)...
 \DeclareExerciseEnvironmentTemplate{parcial}
   {\IfExercisePropertySetT{nuevapagina}{\clearpage}%
    \begin{enumerate}[start=\GetExerciseProperty{counter}]
-   \item \IfExercisePropertySetT{subtitle}{\textbf{\GetExerciseProperty{subtitle}.} }%
+   \item \cursosubtituloactual%
    \ifmostrarpuntos\IfExercisePropertySetT{points}{\textit{(\GetExerciseProperty{points}~puntos)} }\fi
    \ignorespaces}
   {\end{enumerate}}
