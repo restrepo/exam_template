@@ -1,14 +1,136 @@
-\documentclass{article}
-\usepackage{graphicx} % Required for inserting images
+% =====================================================================
+% Plantilla de examen en formato xsim: banco de problemas y soluciones.
+%
+% - Cada problema es un entorno exercise con su solution justo debajo:
+%     \begin{exercise}[ID=nombre, subtitle={Título}, tags={examen}, points=25]
+%   ID es único; subtitle, points y nuevapagina=true son opcionales.
+% - Se imprimen solo los problemas cuya etiqueta (tags) coincide con la de
+%   \xsimsetup{tags={...}} en el bloque «Selección del examen». Los que
+%   tienen otra etiqueta (por ejemplo, banco) quedan guardados sin imprimirse.
+% - Para el solucionario: \solucionestrue. También muestra lo que va dentro
+%   de \phantom (tablas que el estudiante completa).
+% - nuevapagina=true empieza el problema en una página nueva.
+% - Partes de un problema que no se preguntan: \begin{comment}...\end{comment}
+%   dentro del problema.
+% - La skill banco-examenes lista todos los problemas de los exámenes,
+%   arma el banco con soluciones y monta exámenes nuevos con problemas elegidos.
+% =====================================================================
+\documentclass[12pt, a4paper]{article}
 
-\title{exam template}
-\author{Diego Restrepo}
-\date{November 2026}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage[margin=2cm]{geometry}
+\usepackage{siunitx}
+\usepackage{cancel}
+\usepackage{enumitem}
+\usepackage{sectsty}
+\usepackage{tikz}
+\usetikzlibrary{babel, patterns}
+
+% soluciones y banco de problemas
+                                  % para mostrar lo que va dentro de \phantom
+
+\pagestyle{empty}
+\sectionfont{\centering\large\bfseries}
+
+% --- xsim: problemas, soluciones y banco (bloque estándar del curso) ---
+% Cada problema es un entorno exercise con su solution justo debajo:
+%   \begin{exercise}[ID=..., subtitle={...}, tags={...}, points=..., nuevapagina=true]
+% Solo se imprimen los problemas cuya etiqueta está en \xsimsetup{tags=...};
+% los demás forman el banco. Las partes de un problema que no se preguntan
+% van en \begin{comment}...\end{comment} dentro del problema.
+\usepackage{enumitem}
+\usepackage{xsim}
+% xsim relee cada problema desde un archivo: con babel en español, < y > activos
+% rompen opciones de TikZ como >=stealth. Se desactivan esos dos atajos.
+\AtBeginDocument{\shorthandoff{<>}}
+% comment: partes que no se preguntan; se descartan (no usa el paquete comment,
+% que no funciona dentro de los problemas de xsim)
+\usepackage{environ}
+\NewEnviron{comment}{}
+\DeclareExerciseProperty{nuevapagina}
+\newif\ifmostrarpuntos \mostrarpuntostrue   % \mostrarpuntosfalse: no imprime «(25 puntos)»
+% Cada problema se imprime como un ítem numerado de una lista, igual que con
+% \begin{enumerate}\item: las listas internas conservan sus etiquetas a), b)...
+\DeclareExerciseEnvironmentTemplate{parcial}
+  {\IfExercisePropertySetT{nuevapagina}{\clearpage}%
+   \begin{enumerate}[start=\GetExerciseProperty{counter}]
+   \item \IfExercisePropertySetT{subtitle}{\textbf{\GetExerciseProperty{subtitle}.} }%
+   \ifmostrarpuntos\IfExercisePropertySetT{points}{\textit{(\GetExerciseProperty{points}~puntos)} }\fi
+   \ignorespaces}
+  {\end{enumerate}}
+\DeclareExerciseEnvironmentTemplate{parcial-sol}
+  {\begin{enumerate}\item[]\textbf{Solución: }\ignorespaces}
+  {\end{enumerate}\medskip}
+\xsimsetup{exercise/template = parcial, solution/template = parcial-sol}
+% --- fin xsim ---
+% === Selección del examen (cambie solo estas líneas) ===
+\xsimsetup{tags={examen}}   % se imprimen solo los problemas con esta etiqueta
+\newif\ifsoluciones
+\solucionesfalse   % \solucionestrue: solucionario (también muestra lo que va en \phantom)
+\ifsoluciones\xsimsetup{solution/print=true}\renewcommand{\phantom}[1]{#1}\fi
+% === fin selección ===
 
 \begin{document}
 
-\maketitle
+\vspace*{-2cm}
+Nombre:$\underline{\hspace{8.5cm}}$ Identificación: \hrulefill
 
-\section{Introduction}
+\quad
+
+% ===== Problemas: se imprimen los que tienen la etiqueta de \xsimsetup{tags={...}} =====
+
+\begin{exercise}[ID=caida, subtitle={Caída libre}, tags={examen}, points=50]
+Una piedra se suelta desde el reposo a una altura $h=\qty{20}{\m}$. Despreciando la fricción con el aire:
+\begin{enumerate}
+    \item Calcule la rapidez con que llega al suelo. Tome $g=\qty{9.8}{\m/\s^2}$.
+    \item ¿Depende el resultado de la masa de la piedra? Explique.
+\end{enumerate}
+
+\vspace{5cm}
+\end{exercise}
+\begin{solution}
+\begin{enumerate}
+    \item Por conservación de la energía mecánica,
+    \begin{align}
+        \cancel{m}gh = \frac{1}{2}\cancel{m}v^2
+        \;\Longrightarrow\;
+        v = \sqrt{2gh} = \sqrt{2\times 9.8\times 20}\,\unit{\m/\s} \approx \qty{19.8}{\m/\s}\,.
+    \end{align}
+    \item No: la masa se cancela en los dos lados de la ecuación.
+\end{enumerate}
+\end{solution}
+
+\begin{exercise}[ID=choque, subtitle={Acción y reacción}, tags={examen}, points=50]
+Un carro pequeño choca de frente contra un camión pesado. Durante el choque, ¿cuál de los siguientes enunciados es correcto?
+\begin{enumerate}
+    \item La fuerza del camión sobre el carro es mayor que la del carro sobre el camión.
+    \item La fuerza del carro sobre el camión es mayor que la del camión sobre el carro.
+    \item Las dos fuerzas tienen la misma magnitud y direcciones opuestas.
+    \item Depende de cuál de los dos vehículos iba más rápido.
+\end{enumerate}
+\begin{comment}
+% Parte que no se pregunta en este examen: no se imprime, ni aun con \solucionestrue.
+(II) ¿Cuál de los dos vehículos sufre el mayor cambio de velocidad?
+\end{comment}
+\end{exercise}
+\begin{solution}
+c). Por acción y reacción, las fuerzas que se hacen dos cuerpos son iguales en magnitud y opuestas, sin importar sus masas ni sus velocidades.
+\end{solution}
+
+% ===== Banco: problemas guardados que no van en este examen =====
+
+\begin{exercise}[ID=impulso, subtitle={Fuerza media del bate}, tags={banco}, points=25]
+Una pelota de béisbol de $\qty{0.15}{\kilo\g}$ llega al bate con una rapidez de $\qty{40}{\m/\s}$ y sale en la dirección contraria con la misma rapidez. El contacto dura $\Delta t=\qty{2}{\milli\s}$. Calcule la fuerza media que hace el bate usando la ley de la fuerza, $F=\Delta p/\Delta t$.
+\end{exercise}
+\begin{solution}
+Tomando como positivo el sentido de salida,
+\begin{align}
+    F = \frac{\Delta p}{\Delta t} = \frac{(0.15)(40)-(0.15)(-40)}{\num{2e-3}}\,\unit{\N} = \qty{6000}{\N}\,.
+\end{align}
+\end{solution}
 
 \end{document}
